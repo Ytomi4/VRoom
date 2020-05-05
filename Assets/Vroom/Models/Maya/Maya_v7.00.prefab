@@ -3226,7 +3226,7 @@ MonoBehaviour:
   DrawGizmo: 1
   UpdateType: 1
   Target: {fileID: 0}
-  Head: {fileID: 7575343797163485713}
+  Head: {fileID: 0}
   m_yaw: 0
   m_pitch: 0
 --- !u!114 &6742309806928861578
