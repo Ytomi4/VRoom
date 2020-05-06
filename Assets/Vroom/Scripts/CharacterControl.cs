@@ -15,25 +15,25 @@ public class CharacterControl : HMDInputManager
 
     #region IK Targets
     [SerializeField]
-    private GameObject _targetRightHand;
+    private GameObject _targetRightHand = default;
     [SerializeField]
-    private GameObject _targetMouse;
+    private GameObject _targetMouse = default;
 
     [SerializeField]
-    private GameObject _targetLeftHand;
+    private GameObject _targetLeftHand = default;
     [SerializeField]
-    private GameObject _targetKeyboard;
+    private GameObject _targetKeyboard = default;
 
     [SerializeField]
-    private GameObject _targetPelvis;
+    private GameObject _targetPelvis = default;
     [SerializeField]
-    private GameObject _targetLeftLeg;
+    private GameObject _targetLeftLeg = default;
     [SerializeField]
-    private GameObject _targetLeftLeg_BendGoal;
+    private GameObject _targetLeftLeg_BendGoal = default;
     [SerializeField]
-    private GameObject _targetRightLeg;
+    private GameObject _targetRightLeg = default;
     [SerializeField]
-    private GameObject _targetRightLeg_BendGoal;
+    private GameObject _targetRightLeg_BendGoal = default;
     #endregion
 
 

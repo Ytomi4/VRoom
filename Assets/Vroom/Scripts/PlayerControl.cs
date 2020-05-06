@@ -4,16 +4,21 @@ using UnityEngine;
 
 public class PlayerControl : HMDInputManager
 {
-    public GameObject leftHandCube;
-    public GameObject rightHandCube;
-    public GameObject headCamera;
-    public GameObject cameraResetPos;
+    [SerializeField]
+    private GameObject _leftHandInScene = default;
+    [SerializeField]
+    private GameObject _rightHandInScene = default;
+    [SerializeField]
+    private GameObject _headCamera = default;
+    [SerializeField]
+    private GameObject _cameraResetPos = default;
 
 
     
     void Start()
     {
         ImportVRM.AvatarLoaded += CalibrationIniciate;
+        ImportVRMAsync.AvatarLoaded += CalibrationIniciate;
     }
 
     void Update()
@@ -21,17 +26,17 @@ public class PlayerControl : HMDInputManager
         IKTarget();
 
         if (Input.GetKeyDown(KeyCode.Space))
-            Calibration(headCamera, cameraResetPos);
+            Calibration(_headCamera, _cameraResetPos);
     }
 
     private void IKTarget()
     {
 
-        leftHandCube.transform.localPosition = LeftHandTransform.position;
-        leftHandCube.transform.localRotation = LeftHandTransform.rotation;
+        _leftHandInScene.transform.localPosition = LeftHandTransform.position;
+        _leftHandInScene.transform.localRotation = LeftHandTransform.rotation;
 
-        rightHandCube.transform.localPosition = RightHandTransform.position;
-        rightHandCube.transform.localRotation = RightHandTransform.rotation;
+        _rightHandInScene.transform.localPosition = RightHandTransform.position;
+        _rightHandInScene.transform.localRotation = RightHandTransform.rotation;
     }
 
     public void Calibration(GameObject head, GameObject resetPos)
@@ -44,7 +49,7 @@ public class PlayerControl : HMDInputManager
 
     private void CalibrationIniciate()
     {
-        Calibration(headCamera, cameraResetPos);
+        Calibration(_headCamera, _cameraResetPos);
     }
 
 }

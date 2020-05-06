@@ -30,7 +30,7 @@ public class RenderTextureSwitch : MonoBehaviour
             
     }
 
-    private void TextureSwitch()
+    public void TextureSwitch()
     {
         Debug.Log("textureSwitch");
         i++;

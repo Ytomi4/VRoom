@@ -98,7 +98,7 @@ public class HandTransform
 
     private void RightTriggerButtonDown()
     {
-        LeftHand.TryGetFeatureValue(CommonUsages.triggerButton, out bool tempState);
+        RightHand.TryGetFeatureValue(CommonUsages.triggerButton, out bool tempState);
 
         if(tempState == true && tempState != lastButtonState_Trigger)
         {

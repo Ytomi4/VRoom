@@ -8,8 +8,7 @@ public class GadgetsControl : MonoBehaviour
 
     void Start()
     {
-        if(handsFreeModeObjects == null)
-            handsFreeModeObjects = GameObject.FindGameObjectsWithTag("HandsFreeMode");
+        handsFreeModeObjects = GameObject.FindGameObjectsWithTag("HandsFreeMode");
 
         Debug.Log(handsFreeModeObjects);
 
