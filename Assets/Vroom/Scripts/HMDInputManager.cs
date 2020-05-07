@@ -64,6 +64,7 @@ public class HandTransform
 
     public static Action LeftGetGripButtonDown;
     public static Action RightGetGripButtonDown;
+
     public static Action RightGetTriggerButtonDown;
 
     private static bool lastButtonState_Left = false;
