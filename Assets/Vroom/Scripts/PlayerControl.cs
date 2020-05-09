@@ -8,17 +8,16 @@ public class PlayerControl : HMDInputManager
     private GameObject _leftHandInScene = default;
     [SerializeField]
     private GameObject _rightHandInScene = default;
-    [SerializeField]
-    private GameObject _headCamera = default;
-    [SerializeField]
-    private GameObject _cameraResetPos = default;
+    
+    public GameObject HeadCamera { get; private set; }
+    public GameObject CameraResetPos { get; private set; }
 
 
     
     void Start()
     {
-        ImportVRM.AvatarLoaded += CalibrationIniciate;
-        ImportVRMAsync.AvatarLoaded += CalibrationIniciate;
+        HeadCamera = transform.Find("HeadCamera").gameObject;
+        CameraResetPos = GameObject.Find("HeadResetPos");
     }
 
     void Update()
@@ -26,7 +25,7 @@ public class PlayerControl : HMDInputManager
         IKTarget();
 
         if (Input.GetKeyDown(KeyCode.Space))
-            Calibration(_headCamera, _cameraResetPos);
+            Calibration(HeadCamera, CameraResetPos);
     }
 
     private void IKTarget()
@@ -41,15 +40,16 @@ public class PlayerControl : HMDInputManager
 
     public void Calibration(GameObject head, GameObject resetPos)
     {
-        float posY = transform.position.y;
-        posY += resetPos.transform.position.y - head.transform.position.y;
-        transform.position = new Vector3(transform.position.x, posY, transform.position.z);
+        Quaternion rot = Quaternion.FromToRotation(head.transform.forward, resetPos.transform.forward);
+        rot.x = 0;
+        rot.z = 0;
+        transform.rotation *= rot;
+
+        Vector3 moveVec = resetPos.transform.position - head.transform.position;
+        transform.position += moveVec;
+
         Debug.Log("Calibration has done");
     }
-
-    private void CalibrationIniciate()
-    {
-        Calibration(_headCamera, _cameraResetPos);
-    }
+    
 
 }

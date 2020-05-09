@@ -59,63 +59,111 @@ public class HandTransform
         //GripButtonDown(LeftHand);
         LeftGripButtonDown();
         RightGripButtonDown();
+        LeftTriggerButtonDown();
         RightTriggerButtonDown();
+        LeftTouchPadClickDown();
+        RightTouchPadClickDown();
+        
     }
 
     public static Action LeftGetGripButtonDown;
     public static Action RightGetGripButtonDown;
-
+    public static Action LeftGetTriggerButtonDown;
     public static Action RightGetTriggerButtonDown;
+    public static Action LeftGetTouchPadClickDown;
+    public static Action RightGetTouchPadClickDown;
 
-    private static bool lastButtonState_Left = false;
-    private static bool lastButtonState_Right = false;
-    private static bool lastButtonState_Trigger = false;
-    //private static HMD_GetKeyDown getKeyDown;
+    private static bool lastButtonState_LeftGrip = false;
+    private static bool lastButtonState_RightGrip = false;
+    private static bool lastButtonState_LeftTrigger = false;
+    private static bool lastButtonState_RightTrigger = false;
+    private static bool lastButtonState_LeftTouchPadClick = false;
+    private static bool lastButtonState_RightTouchPadClick = false;
+
 
     private void LeftGripButtonDown()
     {
         LeftHand.TryGetFeatureValue(CommonUsages.gripButton, out bool tempState);
 
-        if(tempState == true && tempState != lastButtonState_Left)
+        if(tempState == true && tempState != lastButtonState_LeftGrip)
         {
             LeftGetGripButtonDown.Invoke();
         }
 
-        lastButtonState_Left = tempState;
+        lastButtonState_LeftGrip = tempState;
     }
 
     private void RightGripButtonDown()
     {
         RightHand.TryGetFeatureValue(CommonUsages.gripButton, out bool tempState);
 
-        if (tempState == true && tempState != lastButtonState_Right)
+        if (tempState == true && tempState != lastButtonState_RightGrip)
         {
             if(RightGetGripButtonDown != null)
                 RightGetGripButtonDown();
         }
 
-        lastButtonState_Right = tempState;
+        lastButtonState_RightGrip = tempState;
+    }
+
+    private void LeftTriggerButtonDown()
+    {
+        LeftHand.TryGetFeatureValue(CommonUsages.triggerButton, out bool tempState);
+        if(tempState == true && tempState != lastButtonState_LeftTrigger)
+        {
+            if (LeftGetTriggerButtonDown != null)
+                LeftGetTriggerButtonDown();
+        }
+
+        lastButtonState_LeftTrigger = tempState;
     }
 
     private void RightTriggerButtonDown()
     {
         RightHand.TryGetFeatureValue(CommonUsages.triggerButton, out bool tempState);
 
-        if(tempState == true && tempState != lastButtonState_Trigger)
+        if(tempState == true && tempState != lastButtonState_RightTrigger)
         {
             if (RightGetTriggerButtonDown != null)
                 RightGetTriggerButtonDown();
-            Debug.Log("TriggerButton Pressed");
         }
 
-        lastButtonState_Trigger = tempState;
+        lastButtonState_RightTrigger = tempState;
     }
+
+    private void LeftTouchPadClickDown()
+    {
+        LeftHand.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out bool tempState);
+
+        if (tempState == true && tempState != lastButtonState_LeftTouchPadClick)
+        {
+            if (LeftGetTouchPadClickDown != null)
+                LeftGetTouchPadClickDown();
+        }
+
+        lastButtonState_LeftTouchPadClick = tempState;
+    }
+
+
+    private void RightTouchPadClickDown()
+    {
+        RightHand.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out bool tempState);
+        
+        if(tempState==true && tempState != lastButtonState_RightTouchPadClick)
+        {
+            if (RightGetTouchPadClickDown != null)
+                RightGetTouchPadClickDown();
+        }
+
+        lastButtonState_RightTouchPadClick = tempState;
+    }
+
 
 
     public void Get2DAxisInput_withoutNoise(InputDevice device, out Vector2 inputVec)
     {
         device.TryGetFeatureValue(CommonUsages.primary2DAxis, out inputVec);
-        if (inputVec.magnitude < 0.5)
+        if (inputVec.magnitude < 0.2)
         {
             inputVec = Vector2.zero;
         }

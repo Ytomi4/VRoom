@@ -11,7 +11,22 @@ public class CharacterControl : HMDInputManager
     private float _rotSpeed = 100f;
 
     private GameObject _avatar;
-    private VRIK _vrik;
+    private VRIK _vrik = default;
+
+    private PlayerControl _playerControl;
+
+    private bool _sitting = false;
+    private bool _handsfree = false;
+    
+    private GameObject[] _handsfreeModeGadgets;
+
+    [SerializeField]
+    private GameObject _chair = default;
+    private Vector3 _chairLocalPos;
+    private Quaternion _chairLocalRot;
+    private Vector3 _chairLocalScale;
+    [SerializeField]
+    private GameObject _chairParent= default;
 
     #region IK Targets
     [SerializeField]
@@ -39,11 +54,18 @@ public class CharacterControl : HMDInputManager
 
     void Start()
     {
-        ImportVRM.AvatarLoaded += AvatarSetup;
         ImportVRMAsync.AvatarLoaded += AvatarSetup;
 
-        RightGetGripButtonDown += SwitchToHandsFreeMode;
-        LeftGetGripButtonDown += SwitchToTrackingMode;        
+        RightGetGripButtonDown += SwitchStandingSitting;
+        LeftGetGripButtonDown += SwitchHandsfreeTracking;
+
+        _playerControl = transform.Find("Player").gameObject.GetComponent<PlayerControl>();
+
+        _handsfreeModeGadgets = GameObject.FindGameObjectsWithTag("HandsFreeMode");
+
+        _chairLocalPos = _chair.transform.localPosition;
+        _chairLocalRot = _chair.transform.localRotation;
+        _chairLocalScale = _chair.transform.localScale;
     }
 
     void Update()
@@ -59,13 +81,9 @@ public class CharacterControl : HMDInputManager
 
     private void AvatarSetup()
     {
-        if(ImportVRM._avatar != null)
-        {
-            _avatar = ImportVRM._avatar;
-        }else if(ImportVRMAsync._avatar != null){
-            _avatar = ImportVRMAsync._avatar;
-        }else
-        {
+        if(ImportVRMAsync.Avatar != null){
+            _avatar = ImportVRMAsync.Avatar;
+        }else{
             Debug.Log("cant find AvatarFile");
         }
 
@@ -77,15 +95,54 @@ public class CharacterControl : HMDInputManager
         _vrik.solver.rightArm.stretchCurve = new AnimationCurve();
 
         _vrik.solver.spine.headTarget = HeadTransform;
-        _vrik.solver.spine.pelvisTarget = _targetPelvis.transform;
 
-        LeftGetGripButtonDown();
+        _vrik.solver.spine.pelvisTarget = _targetPelvis.transform;
 
         _vrik.solver.leftLeg.target = _targetLeftLeg.transform;
         _vrik.solver.leftLeg.bendGoal = _targetLeftLeg_BendGoal.transform;
         _vrik.solver.rightLeg.target = _targetRightLeg.transform;
         _vrik.solver.rightLeg.bendGoal = _targetRightLeg_BendGoal.transform;
 
+        SittingMode();
+        HandsfreeMode();
+
+        _playerControl.Calibration(_playerControl.HeadCamera, _playerControl.CameraResetPos);
+    }
+
+    private void SwitchStandingSitting()
+    {
+        _sitting = !_sitting;
+        if (_sitting)
+        {
+            SittingMode();
+            _chair.transform.SetParent(transform);
+            _chair.transform.localPosition = _chairLocalPos;
+            _chair.transform.localRotation = _chairLocalRot;
+            _chair.transform.localScale = _chairLocalScale;
+            
+        }
+        else
+        {
+            StandingMode();
+            _chair.transform.SetParent(_chairParent.transform, true);
+        }
+    }
+
+    private void SwitchHandsfreeTracking()
+    {
+        _handsfree = !_handsfree;
+        if (_handsfree)
+        {
+            HandsfreeMode();
+        }
+        else
+        {
+            TrackingMode();
+        }
+    }
+
+    private void SittingMode()
+    {
         _vrik.solver.spine.pelvisPositionWeight = 1;
         _vrik.solver.spine.pelvisRotationWeight = 1;
         _vrik.solver.leftLeg.positionWeight = 1;
@@ -94,26 +151,52 @@ public class CharacterControl : HMDInputManager
         _vrik.solver.rightLeg.positionWeight = 1;
         _vrik.solver.rightLeg.rotationWeight = 1;
         _vrik.solver.rightLeg.bendGoalWeight = 1;
-        
+    }
 
-        if (_vrik == null)
-            Debug.Log("cant find VRIK component");
+    private void StandingMode()
+    {
+        _vrik.solver.spine.pelvisPositionWeight = 0;
+        _vrik.solver.spine.pelvisRotationWeight = 0;
+        _vrik.solver.leftLeg.positionWeight = 0;
+        _vrik.solver.leftLeg.rotationWeight = 0;
+        _vrik.solver.leftLeg.bendGoalWeight = 0;
+        _vrik.solver.rightLeg.positionWeight = 0;
+        _vrik.solver.rightLeg.rotationWeight = 0;
+        _vrik.solver.rightLeg.bendGoalWeight = 0;
 
-        
+        _vrik.solver.leftLeg.swivelOffset = 15;
+        _vrik.solver.rightLeg.swivelOffset = 15;
+
+        _vrik.solver.locomotion.footDistance = 0.15f;
+        _vrik.solver.locomotion.stepThreshold = 0.4f;
+        _vrik.solver.locomotion.maxVelocity = 0.3f;
+        _vrik.solver.locomotion.velocityFactor = 0.3f;
+        _vrik.solver.locomotion.rootSpeed = 30;
     }
 
 
-    private void SwitchToHandsFreeMode()
+    private void HandsfreeMode()
     {
-        Debug.Log("SwitchToHandsFreeMode");
         _vrik.solver.rightArm.target = _targetMouse.transform;
         _vrik.solver.leftArm.target = _targetKeyboard.transform;
+
+        foreach(GameObject gadget in _handsfreeModeGadgets)
+        {
+            if (gadget.activeSelf == false)
+                gadget.SetActive(true);
+        }
     }
 
-    private void SwitchToTrackingMode()
+    private void TrackingMode()
     {
         _vrik.solver.rightArm.target = _targetRightHand.transform;
         _vrik.solver.leftArm.target = _targetLeftHand.transform;
+
+        foreach (GameObject gadget in _handsfreeModeGadgets)
+        {
+            if (gadget.activeSelf == true)
+                gadget.SetActive(false);
+        }
     }
 
     

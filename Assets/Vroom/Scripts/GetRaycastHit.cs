@@ -8,6 +8,7 @@ public class GetRaycastHit : HMDInputManager
 
     private GameObject _rayOrigin;
     private Vector3 _rayDir;
+    private Vector3 _rayDirOffset;
     private GameObject _rayCastLaser;
     private LineRenderer _laser;
 
@@ -29,33 +30,28 @@ public class GetRaycastHit : HMDInputManager
         _laser = _rayCastLaser.GetComponent<LineRenderer>();
 
         _rayOrigin = transform.Find("RayOriginDefault").gameObject;
+        _rayDirOffset = Vector3.forward;
 
         ImportVRMAsync.AvatarLoaded += RayOriginToCharactersHand;
     }
 
     void Update()
     {
-        _rayDir = _rayOrigin.transform.rotation * Vector3.right;
-
-        //TriggerAction-=のため（要検討）
-        GameObject gameObject = transform.Find("DrawingLine").gameObject;
-        var drawingLine = gameObject.GetComponent<DrawingLine>();
+        _rayDir = _rayOrigin.transform.rotation * _rayDirOffset;
 
         if (Physics.Raycast(_rayOrigin.transform.position, _rayDir, out RaycastHit hit, _rayDistance, _layerMask))
         {
-
             if (!_rayCastLaser.activeSelf)
             {
                 _rayCastLaser.SetActive(true);
 
-                switch (hit.transform.gameObject.name)
+                switch (hit.transform.gameObject.tag)
                 {
-                    case "WhiteBoard":
-                        //GameObject gameObject = transform.Find("Line").gameObject;
-                        //var drawingLine = gameObject.GetComponent<DrawingLine>();
+                    case "Writable":
+                        GameObject gameObject = hit.transform.Find("DrawingLine").gameObject;
+                        var drawingLine = gameObject.GetComponent<DrawingLine>();
                         RightGetTriggerButtonDown += drawingLine.DrawingStart;
                         _rayCastHitUpdate += drawingLine.DrawingUpdate;
-                        Debug.Log("TriggerButton +=");
                         break;
                 }
             }
@@ -71,18 +67,17 @@ public class GetRaycastHit : HMDInputManager
         {
             _rayCastLaser.SetActive(false);
             _rayCastHitUpdate = delegate () { };
-            RightGetTriggerButtonDown -= drawingLine.DrawingStart;
+            RightGetTriggerButtonDown = delegate () { };
 
             //case 円を重ねる（Instanciate）ことによる描線
             //drawingLine.ResetLastDraw();
-
-            Debug.Log("TriggerButton -=");
         }
     }
 
     private void RayOriginToCharactersHand()
     {
-        _rayOrigin = ImportVRMAsync._avatar.transform.Find(_rightIndexEndPath).gameObject;
+        _rayOrigin = ImportVRMAsync.Avatar.transform.Find(_rightIndexEndPath).gameObject;
+        _rayDirOffset = Vector3.right;
     }
     
 }

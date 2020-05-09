@@ -16,7 +16,7 @@ public class RenderTextureSwitch : MonoBehaviour
         spoutSender = GetComponent<SpoutSender>();
         spoutSender.sourceTexture = textures[0];
 
-        HMDInputManager.RightGetTriggerButtonDown += TextureSwitch;
+        HMDInputManager.LeftGetTriggerButtonDown += TextureSwitch;
     }
 
     void Update()

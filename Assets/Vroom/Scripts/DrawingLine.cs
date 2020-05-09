@@ -7,6 +7,8 @@ using UnityEngine.XR;
 public class DrawingLine : HMDInputManager
 {
     private List<LineRenderer> _lineRendererList;
+    public List<GameObject> LinesParentsList;
+
 
     [SerializeField]
     private GameObject _lineObject;
@@ -38,12 +40,16 @@ public class DrawingLine : HMDInputManager
         
     }
 
-    //LineRendererをつかった描線
+    //メッシュの動的生成（LineRenderer）による描線
 
     private void AddLineRendererObject()
     {
         Debug.Log("AddLineObject");
-        GameObject lineObject = GameObject.Instantiate(_lineObject, transform);
+        GameObject gameObject = new GameObject("LinesParent");
+        LinesParentsList.Add(gameObject);
+
+        gameObject.transform.parent = transform;
+        GameObject lineObject = GameObject.Instantiate(_lineObject, gameObject.transform);
         _lineRendererList.Add(lineObject.GetComponent<LineRenderer>());
 
         _lineRendererList.Last().positionCount = 0;
@@ -55,16 +61,14 @@ public class DrawingLine : HMDInputManager
         {
             _lineRendererList.Last().positionCount += 1;
             _lineRendererList.Last().SetPosition(_lineRendererList.Last().positionCount - 1, GetRaycastHit.Hit.point + new Vector3(0, 0, 0.01f));
-
-            Debug.Log("Draw at " + GetRaycastHit.Hit.transform.position);
         }
     }
 
     //円を重ねる（Instanciate）ことによる描線
     [SerializeField]
-    private GameObject _brush;
+    private GameObject _brush =default;
     [SerializeField]
-    private GameObject _whiteBoard;
+    private GameObject _whiteBoard=default;
 
     private float _spacing = 0.001f;
     private Vector3 _lastDraw = Vector3.zero;

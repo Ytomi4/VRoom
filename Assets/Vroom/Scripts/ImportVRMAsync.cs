@@ -8,33 +8,40 @@ using UnityEngine.UI;
 public class ImportVRMAsync : HMDInputManager
 {
     [SerializeField]
-    private Button _button;
+    private Button _button = default;
 
     public static Action AvatarLoaded;
-    public static GameObject _avatar { get; private set; }
+    public static GameObject Avatar { get; private set; }
 
     private void Start()
     {
-        _avatar = null;
+        Avatar = null;
 
         _button?.onClick.AddListener(async () =>
         {
             var bytes = await Task.Run(() => ReadBytes());
 
-            var context = new VRMImporterContext();
+            if(bytes != null)
+            {
+                var context = new VRMImporterContext();
 
-            await Task.Run(() => context.ParseGlb(bytes));
-            var meta = context.ReadMeta(false);
+                await Task.Run(() => context.ParseGlb(bytes));
+                var meta = context.ReadMeta(false);
 
-            context.LoadAsync(() => OnLoaded(context));
+                context.LoadAsync(() => OnLoaded(context));
+            }
         });
     }
 
     private byte[] ReadBytes()
     {
         string path = OpenFileName.ShowDialog("open vrm", "vrm");
-        Debug.Log(path);
-        return File.ReadAllBytes(path);
+        if(path != null)
+        {
+            Debug.Log(path);
+            return File.ReadAllBytes(path);
+        }
+        return null;
     }
 
     private void OnLoaded(VRMImporterContext context)
@@ -45,10 +52,10 @@ public class ImportVRMAsync : HMDInputManager
             Destroy(otherAvatar);
         }
 
-        _avatar = context.Root;
+        Avatar = context.Root;
 
-        _avatar.transform.SetParent(transform, false);
-        _avatar.gameObject.tag = "Avatar";
+        Avatar.transform.SetParent(transform, false);
+        Avatar.gameObject.tag = "Avatar";
 
         context.ShowMeshes();
 
