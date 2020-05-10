@@ -49,7 +49,7 @@ public class DrawingLine : HMDInputManager
         LinesParentsList.Add(gameObject);
 
         gameObject.transform.parent = transform;
-        GameObject lineObject = GameObject.Instantiate(_lineObject, gameObject.transform);
+        GameObject lineObject = Instantiate(_lineObject, gameObject.transform);
         _lineRendererList.Add(lineObject.GetComponent<LineRenderer>());
 
         _lineRendererList.Last().positionCount = 0;

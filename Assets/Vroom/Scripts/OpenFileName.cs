@@ -72,7 +72,7 @@ public class OpenFileName
     public OpenFileName(string title, string extension)
     {
         this.structSize = Marshal.SizeOf(this);
-        this.filter = Filter(extension, "*" + extension);
+        //this.filter = Filter(extension, "*" + extension);
         this.file = new string('\0', 4096);
         this.maxFile = this.file.Length;
         this.fileTitle = new string('\0', 256);
@@ -103,21 +103,6 @@ public class OpenFileName
         }
         return null;
     }
-
-    //public static async Task<string> ShowDialogAsync(string title, string extension)
-    //{
-    //    string path = null;
-    //    await Task.Run(() =>
-    //    {
-    //        OpenFileName ofn = new OpenFileName(title, extension);
-    //        if (GetOpenFileName(ofn))
-    //        {
-    //            path = ofn.file;
-    //        }
-    //        path = null;
-    //    });
-    //    return path;
-    //}
     
 }
 

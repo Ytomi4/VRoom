@@ -152,7 +152,12 @@ public class HandTransform
         if(tempState==true && tempState != lastButtonState_RightTouchPadClick)
         {
             if (RightGetTouchPadClickDown != null)
+            {
                 RightGetTouchPadClickDown();
+                Debug.Log("RightGetTouchPadClickDown");
+            }
+                
+            
         }
 
         lastButtonState_RightTouchPadClick = tempState;

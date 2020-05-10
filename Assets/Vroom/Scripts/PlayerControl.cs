@@ -11,13 +11,15 @@ public class PlayerControl : HMDInputManager
     
     public GameObject HeadCamera { get; private set; }
     public GameObject CameraResetPos { get; private set; }
+    public GameObject CameraResetPosStanding { get; private set; }
 
 
     
     void Start()
     {
         HeadCamera = transform.Find("HeadCamera").gameObject;
-        CameraResetPos = GameObject.Find("HeadResetPos");
+        CameraResetPos = transform.parent.transform.Find("Target/HeadResetPos").gameObject;
+        CameraResetPosStanding = transform.parent.transform.Find("Target/HeadResetPosStanding").gameObject;
     }
 
     void Update()

@@ -12,8 +12,6 @@ public class GetRaycastHit : HMDInputManager
     private GameObject _rayCastLaser;
     private LineRenderer _laser;
 
-    private string _rightIndexEndPath = "Root/Global/Position/J_Bip_C_Hips/J_Bip_C_Spine/J_Bip_C_Chest/J_Bip_C_UpperChest/J_Bip_R_Shoulder/J_Bip_R_UpperArm/J_Bip_R_LowerArm/J_Bip_R_Hand/J_Bip_R_Index1/J_Bip_R_Index2/J_Bip_R_Index3/J_Bip_R_Index3_end";
-
     private delegate void RayCastHitUpdate();
     private RayCastHitUpdate _rayCastHitUpdate;
     private delegate void RayCastHitButtonEvent();
@@ -37,7 +35,8 @@ public class GetRaycastHit : HMDInputManager
 
     void Update()
     {
-        _rayDir = _rayOrigin.transform.rotation * _rayDirOffset;
+        //_rayDir = _rayOrigin.transform.rotation * _rayDirOffset;
+        _rayDir = _rayOrigin.transform.up;
 
         if (Physics.Raycast(_rayOrigin.transform.position, _rayDir, out RaycastHit hit, _rayDistance, _layerMask))
         {
@@ -45,10 +44,13 @@ public class GetRaycastHit : HMDInputManager
             {
                 _rayCastLaser.SetActive(true);
 
+                ImportVRMAsync.Avatar.GetComponent<Animator>().SetBool("Pointing", true);
+
                 switch (hit.transform.gameObject.tag)
                 {
                     case "Writable":
-                        GameObject gameObject = hit.transform.Find("DrawingLine").gameObject;
+                        Debug.Log("raycastStart");
+                        GameObject gameObject = hit.transform.parent.transform.Find("DrawingLine").gameObject;
                         var drawingLine = gameObject.GetComponent<DrawingLine>();
                         RightGetTriggerButtonDown += drawingLine.DrawingStart;
                         _rayCastHitUpdate += drawingLine.DrawingUpdate;
@@ -66,6 +68,9 @@ public class GetRaycastHit : HMDInputManager
         }else if(_rayCastLaser.activeSelf)
         {
             _rayCastLaser.SetActive(false);
+
+            ImportVRMAsync.Avatar.GetComponent<Animator>().SetBool("Pointing", false);
+
             _rayCastHitUpdate = delegate () { };
             RightGetTriggerButtonDown = delegate () { };
 
@@ -76,7 +81,7 @@ public class GetRaycastHit : HMDInputManager
 
     private void RayOriginToCharactersHand()
     {
-        _rayOrigin = ImportVRMAsync.Avatar.transform.Find(_rightIndexEndPath).gameObject;
+        _rayOrigin = ImportVRMAsync.Avatar.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.RightIndexDistal).gameObject;
         _rayDirOffset = Vector3.right;
     }
     

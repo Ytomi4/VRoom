@@ -28,6 +28,9 @@ public class CharacterControl : HMDInputManager
     [SerializeField]
     private GameObject _chairParent= default;
 
+    //[SerializeField]
+    //private RuntimeAnimatorController _controller = default;
+
     #region IK Targets
     [SerializeField]
     private GameObject _targetRightHand = default;
@@ -87,6 +90,9 @@ public class CharacterControl : HMDInputManager
             Debug.Log("cant find AvatarFile");
         }
 
+        //Animator animator = _avatar.AddComponent<Animator>();
+        //animator.runtimeAnimatorController = _controller;
+
         _vrik = _avatar.AddComponent<VRIK>();
         
         _vrik.AutoDetectReferences();
@@ -107,6 +113,8 @@ public class CharacterControl : HMDInputManager
         HandsfreeMode();
 
         _playerControl.Calibration(_playerControl.HeadCamera, _playerControl.CameraResetPos);
+
+        StartCoroutine("Blink");
     }
 
     private void SwitchStandingSitting()
@@ -115,6 +123,7 @@ public class CharacterControl : HMDInputManager
         if (_sitting)
         {
             SittingMode();
+            _playerControl.Calibration(_playerControl.HeadCamera, _playerControl.CameraResetPos);
             _chair.transform.SetParent(transform);
             _chair.transform.localPosition = _chairLocalPos;
             _chair.transform.localRotation = _chairLocalRot;
@@ -124,6 +133,7 @@ public class CharacterControl : HMDInputManager
         else
         {
             StandingMode();
+            _playerControl.Calibration(_playerControl.HeadCamera, _playerControl.CameraResetPosStanding);
             _chair.transform.SetParent(_chairParent.transform, true);
         }
     }
@@ -147,10 +157,10 @@ public class CharacterControl : HMDInputManager
         _vrik.solver.spine.pelvisRotationWeight = 1;
         _vrik.solver.leftLeg.positionWeight = 1;
         _vrik.solver.leftLeg.rotationWeight = 1;
-        _vrik.solver.leftLeg.bendGoalWeight = 1;
+        _vrik.solver.leftLeg.bendGoalWeight = 0;
         _vrik.solver.rightLeg.positionWeight = 1;
         _vrik.solver.rightLeg.rotationWeight = 1;
-        _vrik.solver.rightLeg.bendGoalWeight = 1;
+        _vrik.solver.rightLeg.bendGoalWeight = 0;
     }
 
     private void StandingMode()
@@ -199,5 +209,15 @@ public class CharacterControl : HMDInputManager
         }
     }
 
+
+    IEnumerator Blink()
+    {
+        while(ImportVRMAsync.Avatar != null)
+        {
+            ImportVRMAsync.Avatar.GetComponent<Animator>().SetTrigger("Blink");
+            float span = Random.Range(3f, 10f);
+            yield return new WaitForSeconds(span);
+        }
+    }
     
 }
