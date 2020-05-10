@@ -6,23 +6,30 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 
+Assets/DynamicBone*
 Assets/Klak*
 Assets/Plugins/RootMotion*
 Assets/uDesktopDuplication*
+Assets/uWindowCapture*
 Assets/VeryAnimation*
+Assets/Virtual room*
 Assets/VRM*
 Assets/Vroom/Models/Assets_OfficeChairs*
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
 
+Assets/DynamicBone.meta
 Assets/Klak.meta
 Assets/Plugins/Rootmotion.meta
 Assets/uDesktopDuplication.meta
+Assets/uWindowCapture.meta
 Assets/VeryAnimation.meta
+Assets/Virtual room.meta
 Assets/VRM.meta
 Assets/Vroom/Models/Assets_OfficeChairs.meta
 uDesktopDuplication.log
+uWindowCapture.log
 
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
