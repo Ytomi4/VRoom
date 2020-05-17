@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using RootMotion.FinalIK;
 
 public class PlayerControl : HMDInputManager
 {
@@ -13,6 +14,8 @@ public class PlayerControl : HMDInputManager
     public GameObject CameraResetPos { get; private set; }
     public GameObject CameraResetPosStanding { get; private set; }
 
+    private GameObject _rightIKTarget;
+    private GameObject _leftIKTarget;
 
     
     void Start()
@@ -20,6 +23,9 @@ public class PlayerControl : HMDInputManager
         HeadCamera = transform.Find("HeadCamera").gameObject;
         CameraResetPos = transform.parent.transform.Find("Target/HeadResetPos").gameObject;
         CameraResetPosStanding = transform.parent.transform.Find("Target/HeadResetPosStanding").gameObject;
+
+        _leftIKTarget = transform.Find("LeftHand/IKTarget").gameObject;
+        _rightIKTarget = transform.Find("RightHand/IKTarget").gameObject;
     }
 
     void Update()

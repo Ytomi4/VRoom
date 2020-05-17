@@ -52,6 +52,8 @@ public class CharacterControl : HMDInputManager
     private GameObject _targetRightLeg = default;
     [SerializeField]
     private GameObject _targetRightLeg_BendGoal = default;
+
+    private GameObject _leftHandIKTarget;
     #endregion
 
 
@@ -69,6 +71,8 @@ public class CharacterControl : HMDInputManager
         _chairLocalPos = _chair.transform.localPosition;
         _chairLocalRot = _chair.transform.localRotation;
         _chairLocalScale = _chair.transform.localScale;
+
+        _leftHandIKTarget = transform.Find("Player/LeftHand/IKTarget").gameObject;
     }
 
     void Update()
@@ -96,6 +100,25 @@ public class CharacterControl : HMDInputManager
         _vrik = _avatar.AddComponent<VRIK>();
         
         _vrik.AutoDetectReferences();
+
+        _vrik.GuessHandOrientations();
+        Debug.Log("solver.leftArm.wristToPalmAxis= " + _vrik.solver.leftArm.wristToPalmAxis);
+        Debug.Log("solver.leftArm.palmToThumbAxix= " + _vrik.solver.leftArm.palmToThumbAxis);
+
+        Vector3 wristToPalm = _vrik.solver.leftArm.wristToPalmAxis;
+        Quaternion leftWristRot = Quaternion.FromToRotation(wristToPalm, _vrik.references.leftHand.transform.rotation * Vector3.left);
+        Debug.Log("wristToPalmRoted = " + leftWristRot * _vrik.solver.leftArm.wristToPalmAxis);
+        _leftHandIKTarget.transform.rotation = leftWristRot * Quaternion.identity;
+
+        Quaternion leftPalmRot = Quaternion.AngleAxis(180, _vrik.references.leftHand.transform.rotation * Vector3.left);
+
+        //Vector3 palmToThumb = leftWristRot * _vrik.solver.leftArm.palmToThumbAxis;
+        //Debug.Log("palmToThumb = " + palmToThumb);
+        //Quaternion leftPalmRot = Quaternion.FromToRotation(palmToThumb, _vrik.references.leftHand.transform.rotation * Vector3.forward);
+
+        _leftHandIKTarget.transform.rotation = leftPalmRot * _leftHandIKTarget.transform.rotation;
+
+        _leftHandIKTarget.transform.position -= 0.1f * -1 * _vrik.references.leftHand.transform.right;
 
         _vrik.solver.leftArm.stretchCurve = new AnimationCurve();
         _vrik.solver.rightArm.stretchCurve = new AnimationCurve();
