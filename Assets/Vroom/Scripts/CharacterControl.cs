@@ -59,7 +59,7 @@ public class CharacterControl : HMDInputManager
 
     void Start()
     {
-        ImportVRMAsync.AvatarLoaded += AvatarSetup;
+        ImportVRMAsync.AvatarLoaded += GetAndSetupAvatar;
 
         RightGetGripButtonDown += SwitchStandingSitting;
         LeftGetGripButtonDown += SwitchHandsfreeTracking;
@@ -73,6 +73,8 @@ public class CharacterControl : HMDInputManager
         _chairLocalScale = _chair.transform.localScale;
 
         _leftHandIKTarget = transform.Find("Player/LeftHand/IKTarget").gameObject;
+        
+        //SetupDefaultAvatar();
     }
 
     void Update()
@@ -86,18 +88,33 @@ public class CharacterControl : HMDInputManager
         transform.Translate(new Vector3(moveDir.x,0,moveDir.y) * Time.deltaTime * _posSpeed);
     }
 
-    private void AvatarSetup()
+    private void SetupDefaultAvatar()
     {
-        if(ImportVRMAsync.Avatar != null){
+        _avatar = transform.Find("DefaultAvatar").gameObject;
+        AvatarSetup();
+    }
+
+    private void GetAndSetupAvatar()
+    {
+        if (ImportVRMAsync.Avatar != null)
+        {
             _avatar = ImportVRMAsync.Avatar;
-        }else{
+        }
+        else
+        {
             Debug.Log("cant find AvatarFile");
         }
 
+        AvatarSetup();
+    }
+
+    private void AvatarSetup()
+    {
         //Animator animator = _avatar.AddComponent<Animator>();
         //animator.runtimeAnimatorController = _controller;
 
         _vrik = _avatar.AddComponent<VRIK>();
+        Debug.Log("AddComponent<VRIK>");
         
         _vrik.AutoDetectReferences();
 
