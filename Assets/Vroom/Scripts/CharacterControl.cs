@@ -10,6 +10,9 @@ public class CharacterControl : HMDInputManager
     [SerializeField]
     private float _rotSpeed = 100f;
 
+    [SerializeField]
+    private float _handOffset = 0.1f;
+
     private GameObject _avatar;
     private VRIK _vrik = default;
 
@@ -53,7 +56,10 @@ public class CharacterControl : HMDInputManager
     [SerializeField]
     private GameObject _targetRightLeg_BendGoal = default;
 
+    private GameObject _leftHand;
     private GameObject _leftHandIKTarget;
+    private GameObject _rightHand;
+    private GameObject _rightHandIKTarget;
     #endregion
 
 
@@ -72,9 +78,12 @@ public class CharacterControl : HMDInputManager
         _chairLocalRot = _chair.transform.localRotation;
         _chairLocalScale = _chair.transform.localScale;
 
+        _leftHand = transform.Find("Player/LeftHand").gameObject;
         _leftHandIKTarget = transform.Find("Player/LeftHand/IKTarget").gameObject;
+        _rightHand = transform.Find("Player/RightHand").gameObject;
+        _rightHandIKTarget = transform.Find("Player/RightHand/IKTarget").gameObject;
         
-        //SetupDefaultAvatar();
+        SetupDefaultAvatar();
     }
 
     void Update()
@@ -115,27 +124,55 @@ public class CharacterControl : HMDInputManager
 
         _vrik = _avatar.AddComponent<VRIK>();
         Debug.Log("AddComponent<VRIK>");
-        
+
         _vrik.AutoDetectReferences();
 
         _vrik.GuessHandOrientations();
         Debug.Log("solver.leftArm.wristToPalmAxis= " + _vrik.solver.leftArm.wristToPalmAxis);
         Debug.Log("solver.leftArm.palmToThumbAxix= " + _vrik.solver.leftArm.palmToThumbAxis);
+        Debug.Log("solver.rightArm.wristToPalmAxis= " + _vrik.solver.rightArm.wristToPalmAxis);
+        Debug.Log("solver.rightArm.palmToThumbAxix= " + _vrik.solver.rightArm.palmToThumbAxis);
 
-        Vector3 wristToPalm = _vrik.solver.leftArm.wristToPalmAxis;
-        Quaternion leftWristRot = Quaternion.FromToRotation(wristToPalm, _vrik.references.leftHand.transform.rotation * Vector3.left);
-        Debug.Log("wristToPalmRoted = " + leftWristRot * _vrik.solver.leftArm.wristToPalmAxis);
-        _leftHandIKTarget.transform.rotation = leftWristRot * Quaternion.identity;
+        _leftHandIKTarget.transform.localPosition = Vector3.zero;
+        _rightHandIKTarget.transform.localPosition = Vector3.zero;
 
-        Quaternion leftPalmRot = Quaternion.AngleAxis(180, _vrik.references.leftHand.transform.rotation * Vector3.left);
+        Quaternion leftWristRot = Quaternion.FromToRotation(_vrik.solver.leftArm.wristToPalmAxis, Vector3.forward);
+        _leftHandIKTarget.transform.localRotation = leftWristRot * Quaternion.identity;
 
-        //Vector3 palmToThumb = leftWristRot * _vrik.solver.leftArm.palmToThumbAxis;
-        //Debug.Log("palmToThumb = " + palmToThumb);
-        //Quaternion leftPalmRot = Quaternion.FromToRotation(palmToThumb, _vrik.references.leftHand.transform.rotation * Vector3.forward);
+        float leftPalmRotAngle = Vector3.Angle(leftWristRot * _vrik.solver.leftArm.palmToThumbAxis, Vector3.right);
+        Debug.Log("leftPalmRotAngle = " + leftPalmRotAngle);
+        Quaternion leftPalmRot = Quaternion.AngleAxis(leftPalmRotAngle, Vector3.forward);
+        _leftHandIKTarget.transform.localRotation = leftPalmRot * _leftHandIKTarget.transform.localRotation;
 
-        _leftHandIKTarget.transform.rotation = leftPalmRot * _leftHandIKTarget.transform.rotation;
+        Vector3 leftThumbDirRotated = leftPalmRot * (leftWristRot * _vrik.solver.leftArm.palmToThumbAxis);
+        if (Vector3.Dot(leftThumbDirRotated, Vector3.right) < 0)
+        {
+            _leftHandIKTarget.transform.localRotation = Quaternion.AngleAxis(180, Vector3.forward) * _leftHandIKTarget.transform.localRotation;
+            Debug.Log("leftThumb re-rotated");
+        }
 
-        _leftHandIKTarget.transform.position -= 0.1f * -1 * _vrik.references.leftHand.transform.right;
+        _leftHandIKTarget.transform.localPosition -= _handOffset * Vector3.forward;
+
+
+        Quaternion rightWristRot = Quaternion.FromToRotation(_vrik.solver.rightArm.wristToPalmAxis, Vector3.forward);
+        _rightHandIKTarget.transform.localRotation = rightWristRot * Quaternion.identity;
+
+        float rightPalmAngle = Vector3.Angle(rightWristRot * _vrik.solver.rightArm.palmToThumbAxis, Vector3.left);
+        Debug.Log("rightPalmRotAngle = " + rightPalmAngle);
+        Quaternion rightPalmRot = Quaternion.AngleAxis(rightPalmAngle, Vector3.forward);
+        _rightHandIKTarget.transform.localRotation = rightPalmRot * _rightHandIKTarget.transform.localRotation;
+
+        Vector3 rightThumbDirRoted = rightPalmRot * (rightWristRot * _vrik.solver.rightArm.palmToThumbAxis);
+        if (Vector3.Dot(rightThumbDirRoted, Vector3.left) < 0)
+        {
+            _rightHandIKTarget.transform.localRotation = Quaternion.AngleAxis(180, Vector3.forward) * _rightHandIKTarget.transform.localRotation;
+            Debug.Log("rightThumb re-rotated");
+        }
+
+        _rightHandIKTarget.transform.localPosition -= _handOffset * Vector3.forward;
+
+        
+        
 
         _vrik.solver.leftArm.stretchCurve = new AnimationCurve();
         _vrik.solver.rightArm.stretchCurve = new AnimationCurve();
@@ -194,12 +231,12 @@ public class CharacterControl : HMDInputManager
     private void SittingMode()
     {
         _vrik.solver.spine.pelvisPositionWeight = 1;
-        _vrik.solver.spine.pelvisRotationWeight = 1;
+        _vrik.solver.spine.pelvisRotationWeight = 0;
         _vrik.solver.leftLeg.positionWeight = 1;
-        _vrik.solver.leftLeg.rotationWeight = 1;
+        _vrik.solver.leftLeg.rotationWeight = 0;
         _vrik.solver.leftLeg.bendGoalWeight = 0;
         _vrik.solver.rightLeg.positionWeight = 1;
-        _vrik.solver.rightLeg.rotationWeight = 1;
+        _vrik.solver.rightLeg.rotationWeight = 0;
         _vrik.solver.rightLeg.bendGoalWeight = 0;
     }
 
@@ -239,8 +276,8 @@ public class CharacterControl : HMDInputManager
 
     private void TrackingMode()
     {
-        _vrik.solver.rightArm.target = _targetRightHand.transform;
-        _vrik.solver.leftArm.target = _targetLeftHand.transform;
+        _vrik.solver.leftArm.target = _leftHandIKTarget.transform;
+        _vrik.solver.rightArm.target = _rightHandIKTarget.transform;
 
         foreach (GameObject gadget in _handsfreeModeGadgets)
         {
