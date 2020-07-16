@@ -11,4 +11,8 @@ HMDを被ったままビデオ通話に参加するためのツールです
 
 ができます。
 
+<br/>
+
+[YouTube動画リンク](https://www.youtube.com/watch?v=Pcl4I9QHJMI)
+
 [![](https://img.youtube.com/vi/Pcl4I9QHJMI/0.jpg)](https://www.youtube.com/watch?v=Pcl4I9QHJMI)
