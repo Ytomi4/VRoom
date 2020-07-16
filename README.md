@@ -10,3 +10,5 @@ HMDを被ったままビデオ通話に参加するためのツールです
 - ランタイムでのAssetBundleの読み込み（require Humanoid Avatar and AnimatorController, support DynamicBone）
 
 ができます。
+
+[![](https://img.youtube.com/vi/Pcl4I9QHJMI/0.jpg)](https://www.youtube.com/watch?v=Pcl4I9QHJMI)
