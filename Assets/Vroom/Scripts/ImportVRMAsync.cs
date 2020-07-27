@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using VRM;
 using UnityEngine;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
 
 public class ImportVRMAsync : HMDInputManager
 {
@@ -22,13 +23,13 @@ public class ImportVRMAsync : HMDInputManager
 
         _buttonVRM?.onClick.AddListener(async () =>
         {
-            var bytes = await Task.Run(() => ReadBytes());
+            var bytes = await UniTask.Run(() => ReadBytes());
 
             if(bytes != null)
             {
                 var context = new VRMImporterContext();
 
-                await Task.Run(() => context.ParseGlb(bytes));
+                await UniTask.Run(() => context.ParseGlb(bytes));
                 var meta = context.ReadMeta(false);
 
                 context.LoadAsync(() => OnLoaded(context));
@@ -37,6 +38,8 @@ public class ImportVRMAsync : HMDInputManager
 
         _buttonAssetBundle?.onClick.AddListener(async () =>
         {
+            string path = await Task.Run(() =>OpenFileName.ShowDialog("all", "."));
+
             //前のアバターの消去
             GameObject[] othreAvatars = GameObject.FindGameObjectsWithTag("Avatar");
             foreach (GameObject otherAvatar in othreAvatars)
@@ -44,21 +47,21 @@ public class ImportVRMAsync : HMDInputManager
                 Destroy(otherAvatar);
             }
 
-            string path = await Task.Run(() =>OpenFileName.ShowDialog("all", "."));
-
             StartCoroutine(LoadBundleCoroutine(path));
         });
     }
 
     private byte[] ReadBytes()
     {
-        string path = OpenFileName.ShowDialog("open vrm", "vrm");
-        if(path != null)
-        {
-            Debug.Log(path);
+        try{
+            string path = OpenFileName.ShowDialog("open vem", "vrm");
             return File.ReadAllBytes(path);
         }
-        return null;
+        catch(Exception e){
+            Debug.Log("the file could not find");
+            Debug.Log(e.Message);
+            return null;
+        }
     }
 
     private void OnLoaded(VRMImporterContext context)
@@ -81,8 +84,9 @@ public class ImportVRMAsync : HMDInputManager
 
 
     //LoadAssetBundleを読み込む（分けるべき?ImportVRMAsync.Avatarにまとめたかった）
+    //Cygnet_MidiDress
 
-    public string assetName = "Cygnet_MidiDress";
+    public string assetName = "Cygnet_JumperSkirt";
 
     private void LoadBundle(string path)
     {
@@ -93,8 +97,18 @@ public class ImportVRMAsync : HMDInputManager
             Debug.LogError("Failed to load AssetBundle!");
         }
 
-        GameObject asset = localAssetBundle.LoadAsset<GameObject>(assetName);
-        Avatar = Instantiate(asset, transform);
+        //GameObject asset = localAssetBundle.LoadAsset<GameObject>(assetName);
+        GameObject[] assets = localAssetBundle.LoadAllAssets<GameObject>();
+
+        if (assets.Length == 0)
+            Debug.Log("thereIsNoAssets");
+        
+        foreach (GameObject asset in assets)
+        {
+            Debug.Log(asset.name);
+        }
+
+        Avatar = Instantiate(assets[0], transform);
         Debug.Log("Avatar Loaded");
         Debug.Log(Avatar.name);
         Avatar.gameObject.tag = "Avatar";
@@ -115,12 +129,26 @@ public class ImportVRMAsync : HMDInputManager
             yield break;
         }
 
-        AssetBundleRequest assetRequest = localAssetBundle.LoadAssetAsync<GameObject>(assetName);
-        yield return assetRequest;
+        //AssetBundleRequest assetRequest = localAssetBundle.LoadAssetAsync<GameObject>(assetName);
+        //yield return assetRequest;
 
-        GameObject prefab = assetRequest.asset as GameObject;
+        //GameObject prefab = assetRequest.asset as GameObject;
 
-        Avatar = Instantiate(prefab, transform);
+        //Avatar = Instantiate(prefab, transform);
+
+        GameObject[] assets = localAssetBundle.LoadAllAssets<GameObject>();
+
+        if (assets.Length == 0)
+            Debug.Log("thereIsNoAssets");
+
+        foreach (GameObject asset in assets)
+        {
+            Debug.Log(asset.name);
+        }
+
+        Avatar = Instantiate(assets[0], transform);
+
+
         Avatar.gameObject.tag = "Avatar";
 
         localAssetBundle.Unload(false);

@@ -9,6 +9,7 @@
 Assets/DynamicBone*
 Assets/Klak*
 Assets/Plugins/RootMotion*
+Assets/Plugins/UniTask*
 Assets/uDesktopDuplication*
 Assets/uWindowCapture*
 Assets/VeryAnimation*
@@ -22,6 +23,7 @@ Assets/Vroom/Models/Assets_OfficeChairs*
 Assets/DynamicBone.meta
 Assets/Klak.meta
 Assets/Plugins/Rootmotion.meta
+Assets/Plugins/UniTask.meta
 Assets/uDesktopDuplication.meta
 Assets/uWindowCapture.meta
 Assets/VeryAnimation.meta
