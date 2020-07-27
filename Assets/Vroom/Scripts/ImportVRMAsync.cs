@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using VRM;
 using UnityEngine;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
 
 public class ImportVRMAsync : HMDInputManager
 {
@@ -22,16 +23,16 @@ public class ImportVRMAsync : HMDInputManager
 
         _buttonVRM?.onClick.AddListener(async () =>
         {
-            var bytes = await Task.Run(() => ReadBytes());
+            var bytes = await UniTask.Run(() => ReadBytes());
 
             if(bytes != null)
             {
                 var context = new VRMImporterContext();
 
-                await Task.Run(() => context.ParseGlb(bytes));
+                await UniTask.Run(() => context.ParseGlb(bytes));
                 var meta = context.ReadMeta(false);
 
-                await context.LoadAsync(() => OnLoaded(context));
+                context.LoadAsync(() => OnLoaded(context));
             }
         });
 
